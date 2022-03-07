@@ -471,6 +471,10 @@ Pushes the branch to `origin` and then creates a Bitbucket pull request for the 
     - Create an application password within your [account settings](https://bitbucket.domain.com/plugins/servlet/access-tokens/manage).
     - We need the scope: Repositories -> Read
 
+#### Optional `push_settings`
+
+- `default_reviewers` (default: `false`): if `true` then add default reviewers to the pull request
+
 ### `all_repos.push.bitbucket_server_pull_request_bearer_auth`
 
 Pushes the branch to `origin` and then creates a Bitbucket pull request for the branch using bearer auth scheme.
@@ -481,6 +485,10 @@ Pushes the branch to `origin` and then creates a Bitbucket pull request for the 
 - `token`: the personal access token which the user will log in
     - Create a personal access token within your [account settings](https://bitbucket.domain.com/plugins/servlet/access-tokens/manage).
     - We need the scope: Repositories -> Read
+
+#### Optional `push_settings`
+
+- `default_reviewers` (default: `false`): if `true` then add default reviewers to the pull request
 
 ### `all_repos.push.readonly`
 

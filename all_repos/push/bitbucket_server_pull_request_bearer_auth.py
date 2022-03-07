@@ -9,6 +9,7 @@ from all_repos.util import hide_api_key_repr
 class Settings(NamedTuple):
     token: str
     base_url: str
+    default_reviewers: bool = False
 
     @property
     def auth_header(self) -> dict[str, str]:
@@ -19,4 +20,9 @@ class Settings(NamedTuple):
 
 
 def push(settings: Settings, branch_name: str) -> None:
-    push_and_create_pr(settings.base_url, settings.auth_header, branch_name)
+    push_and_create_pr(
+        settings.base_url,
+        settings.auth_header,
+        branch_name,
+        settings.default_reviewers,
+    )
