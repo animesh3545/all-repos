@@ -70,22 +70,25 @@ def _default_branch(remote: str) -> str:
     return line[len(start):-1 * len(end)]
 
 
-def _fetch_reset(path: str, *, all_branches: bool) -> None:
+def _fetch_reset(path: str, *, all_branches: bool, target_branches: dict = {}) -> None:
     def _git(*cmd: str) -> None:
         subprocess.check_call(('git', '-C', path, *cmd))
 
     try:
-        branch = _default_branch(git.remote(path))
-        if all_branches:
-            _git(
-                'config', 'remote.origin.fetch',
-                '+refs/heads/*:refs/remotes/origin/*',
-            )
-        else:
-            _git('remote', 'set-branches', 'origin', branch)
-        _git('fetch', 'origin')
-        _git('checkout', branch)
-        _git('reset', '--hard', f'origin/{branch}')
+        repo = path.split("/")[-1]
+        branch = target_branches.get(repo)
+        print(f'{repo} and f{branch}')
+        if branch:
+            if all_branches:
+                _git(
+                    'config', 'remote.origin.fetch',
+                    '+refs/heads/*:refs/remotes/origin/*',
+                )
+            else:
+                _git('remote', 'set-branches', 'origin', branch)
+            _git('fetch', 'origin')
+            _git('checkout', branch)
+            _git('reset', '--hard', f'origin/{branch}')
     except subprocess.CalledProcessError:
         # TODO: color / tty
         print(f'Error fetching {path}')
@@ -127,7 +130,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     for path, remote in filtered_repos - current_repos:
         _init(config.output_dir, path, remote)
 
-    fn = functools.partial(_fetch_reset, all_branches=config.all_branches)
+    fn = functools.partial(_fetch_reset, all_branches=config.all_branches, target_branches=config.target_branches)
     todo = [os.path.join(config.output_dir, p) for p in repos_filtered]
     with mapper.thread_mapper(args.jobs) as do_map:
         mapper.exhaust(do_map(fn, todo))

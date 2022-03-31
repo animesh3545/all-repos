@@ -160,7 +160,7 @@ def target_branch() -> str:
 
 
 @contextlib.contextmanager
-def repo_context(repo: str, *, use_color: bool) -> Generator[None, None, None]:
+def repo_context(repo: str, target_branch: str , *, use_color: bool) -> Generator[None, None, None]:
     print(color.fmt(f'***{repo}', color.TURQUOISE_H, use_color=use_color))
     try:
         remote = git.remote(repo)
@@ -169,6 +169,7 @@ def repo_context(repo: str, *, use_color: bool) -> Generator[None, None, None]:
             with cwd(tmpdir):
                 run('git', 'remote', 'set-url', 'origin', remote)
                 run('git', 'fetch', '--prune', '--quiet')
+                run('git', 'checkout', target_branch)
                 yield
     except Exception:
         print(color.fmt('***Errored', color.RED_H, use_color=use_color))
@@ -229,13 +230,17 @@ def _fix_inner(
         commit: Commit,
         autofix_settings: AutofixSettings,
 ) -> None:
-    with repo_context(repo, use_color=autofix_settings.color):
-        branch_name = f'all-repos_autofix_{commit.branch_name}'
-        run('git', 'checkout', '--quiet', 'origin/HEAD', '-b', branch_name)
+    repo_name = repo.split("/")[-1]
+    print(f"config - {config}")
+    target_branch = config.target_branches[repo_name]
+    with repo_context(repo, target_branch, use_color=autofix_settings.color):
+        repo_name = repo.split("/")[-1]
+        branch_name = f'all-repos_autofix_{repo_name}_{commit.branch_name}'
+        run('git', 'checkout', '--quiet', 'HEAD', '-b', branch_name)
 
         apply_fix()
 
-        diff = run('git', 'diff', 'origin/HEAD', '--exit-code', check=False)
+        diff = run('git', 'diff', 'HEAD', '--exit-code', check=False)
         if not diff.returncode:
             return
 
@@ -262,7 +267,7 @@ def _fix_inner(
         if autofix_settings.dry_run:
             return
 
-        config.push(config.push_settings, branch_name)
+        config.push(config.push_settings, branch_name, target_branch)
 
 
 def _noop_check_fix() -> None:

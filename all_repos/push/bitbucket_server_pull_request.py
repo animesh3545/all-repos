@@ -78,6 +78,7 @@ def make_pull_request(
         base_url: str,
         auth_header: dict[str, str],
         branch_name: str,
+        target_branch_name: str,
         default_reviewers: bool = False,
 ) -> bitbucket_server_api.Response:
     headers = {
@@ -116,7 +117,7 @@ def make_pull_request(
             },
         },
         'toRef': {
-            'id': autofix_lib.target_branch(),
+            'id': target_branch_name,
             'repository': {
                 'slug': repo_slug,
                 'project': {
@@ -139,15 +140,16 @@ def push_and_create_pr(
         base_url: str,
         auth_header: dict[str, str],
         branch_name: str,
+        target_branch_name: str,
         default_reviewers: bool = False,
 ) -> None:
     resp = make_pull_request(
-        base_url, auth_header, branch_name,
+        base_url, auth_header, branch_name, target_branch_name,
         default_reviewers,
     )
     url = resp.links['self'][0]['href'] if resp.links else ''
     print(f'Pull request created at {url}')
 
 
-def push(settings: Settings, branch_name: str) -> None:
-    push_and_create_pr(settings.base_url, settings.auth_header, branch_name)
+def push(settings: Settings, branch_name: str, target_branch_name: str) -> None:
+    push_and_create_pr(settings.base_url, settings.auth_header, branch_name, target_branch_name)
