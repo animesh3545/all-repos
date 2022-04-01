@@ -22,11 +22,16 @@ def find_repos(
 ) -> Generator[str, None, None]:
     for repo in config.get_cloned_repos():
         repo_dir = os.path.join(config.output_dir, repo)
-        if subprocess.run(
-            ('git', '-C', repo_dir, *ls_files_cmd[1:]),
-            check=True, stdout=subprocess.PIPE,
-        ).stdout:
-            yield repo_dir
+        # print(f"subprocess - {subprocess.run(subprocess.run, check=True, stdout=subprocess.PIPE).stdout}")
+        # if subprocess.run(
+        #     # ('git', '-C', repo_dir, *ls_files_cmd[1:]),
+        #     ls_files_cmd,
+        #     check=True, stdout=subprocess.PIPE,
+        # ).stdout:
+        #     print(f'repo_dir - {repo_dir}')
+        #     file = ls_files_cmd[1:]
+        #     print(f'*ls_files_cmd[1:] - {file}')
+        yield repo_dir
 
 
 def apply_fix(
@@ -36,7 +41,11 @@ def apply_fix(
 ) -> None:
     filenames_b = zsplit(subprocess.check_output(ls_files_cmd))
     filenames = [f.decode() for f in filenames_b]
-    filenames = [f for f in filenames if tags_from_path(f) & {'file', 'text'}]
+    filenames_list = []
+    for filename in filenames:
+        filename = filename.replace("./", "")
+        filenames_list.extend(filename.split('\n')[:-1])
+    filenames = [f for f in filenames_list if tags_from_path(f) & {'file', 'text'}]
     autofix_lib.run(*sed_cmd, *filenames)
 
 
@@ -84,7 +93,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     else:
         dash_r = ()
     sed_cmd = ('sed', '-i', *dash_r, args.expression)
-    ls_files_cmd = ('git', 'ls-files', '-z', '--', args.filenames)
+    # ls_files_cmd = ('git', 'ls-files', '-z', '--', args.filenames)
+    ls_files_cmd = ('find', '.', '-name', args.filenames)
 
     msg = f'{_quote_cmd(ls_files_cmd)} | xargs -0 {_quote_cmd(sed_cmd)}'
     msg = args.commit_msg or msg
