@@ -148,6 +148,9 @@ def push_and_create_pr(
         default_reviewers,
     )
     url = resp.links['self'][0]['href'] if resp.links else ''
+    f = open("PRlist.txt", "a")
+    f.write(url)
+    f.close()
     print(f'Pull request created at {url}')
 
 
