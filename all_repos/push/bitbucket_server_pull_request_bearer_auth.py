@@ -19,5 +19,5 @@ class Settings(NamedTuple):
         return hide_api_key_repr(self, key='token')
 
 
-def push(settings: Settings, branch_name: str, target_branch: str='master') -> None:
-    push_and_create_pr(settings.base_url, settings.auth_header, branch_name, target_branch, default_reviewers=True)
+def push(settings: Settings, branch_name: str, target_branch: str = 'master', file_obj=None) -> None:
+    push_and_create_pr(settings.base_url, settings.auth_header, branch_name, target_branch, default_reviewers=True, file_obj=file_obj)

@@ -142,15 +142,19 @@ def push_and_create_pr(
         branch_name: str,
         target_branch_name: str,
         default_reviewers: bool = False,
+        file_obj = None
 ) -> None:
     resp = make_pull_request(
         base_url, auth_header, branch_name, target_branch_name,
         default_reviewers,
     )
     url = resp.links['self'][0]['href'] if resp.links else ''
-    f = open("PRlist.txt", "a")
-    f.write(url)
-    f.close()
+    if file_obj is None:
+        f = open("/opt/aruba/central/apps/all-repos-animesh/PRlist.txt", "a")
+        f.write(url+"\n")
+        f.close()
+    else:
+        file_obj.write(url+"\n")
     print(f'Pull request created at {url}')
 
 

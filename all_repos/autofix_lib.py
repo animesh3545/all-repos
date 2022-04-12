@@ -229,6 +229,7 @@ def _fix_inner(
         config: Config,
         commit: Commit,
         autofix_settings: AutofixSettings,
+        file_object=None
 ) -> None:
     repo_name = repo.split("/")[-1]
     print(f"config - {config}")
@@ -266,8 +267,7 @@ def _fix_inner(
 
         if autofix_settings.dry_run:
             return
-
-        config.push(config.push_settings, branch_name, target_branch)
+        config.push(config.push_settings, branch_name, target_branch, file_object)
 
 
 def _noop_check_fix() -> None:
@@ -282,13 +282,14 @@ def fix(
         config: Config,
         commit: Commit,
         autofix_settings: AutofixSettings,
+        file_object=None
 ) -> None:
     assert not autofix_settings.interactive or autofix_settings.jobs == 1
     repos = tuple(repos)[:autofix_settings.limit]
     func = functools.partial(
         _fix_inner,
         apply_fix=apply_fix, check_fix=check_fix,
-        config=config, commit=commit, autofix_settings=autofix_settings,
+        config=config, commit=commit, autofix_settings=autofix_settings, file_object=file_object
     )
     with mapper.process_mapper(autofix_settings.jobs) as do_map:
         mapper.exhaust(do_map(func, repos))

@@ -79,6 +79,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         ),
     )
     parser.add_argument(
+        '--prlistfile',
+        help=(
+            'Provide the file name to add PR URLs, this will help for tracking Raised PRs'
+        )
+    )
+    parser.add_argument(
         'expression', help='sed program. For example: `s/hi/hello/g`.',
     )
     parser.add_argument(
@@ -99,6 +105,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     msg = f'{_quote_cmd(ls_files_cmd)} | xargs -0 {_quote_cmd(sed_cmd)}'
     msg = args.commit_msg or msg
 
+    prlist_filename = args.prlistfile
+    if os.path.exists(prlist_filename):
+        append_write = 'a'  # append if already exists
+    else:
+        append_write = 'w'  # make a new file if not
+    file_object = open(prlist_filename, append_write)
+
     repos, config, commit, autofix_settings = autofix_lib.from_cli(
         args,
         find_repos=functools.partial(find_repos, ls_files_cmd=ls_files_cmd),
@@ -111,6 +124,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             apply_fix, ls_files_cmd=ls_files_cmd, sed_cmd=sed_cmd,
         ),
         config=config, commit=commit, autofix_settings=autofix_settings,
+        file_object=file_object
     )
     return 0
 
