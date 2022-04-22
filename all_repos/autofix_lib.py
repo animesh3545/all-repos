@@ -236,7 +236,8 @@ def _fix_inner(
     target_branch = config.target_branches[repo_name]
     with repo_context(repo, target_branch, use_color=autofix_settings.color):
         repo_name = repo.split("/")[-1]
-        branch_name = f'all-repos_{repo_name}_{commit.branch_name}'
+        jira_id = config.jira_ids[repo_name]
+        branch_name = f'all-repos-{jira_id}/{commit.branch_name}'
         run('git', 'checkout', '--quiet', 'HEAD', '-b', branch_name)
 
         apply_fix()
@@ -254,7 +255,7 @@ def _fix_inner(
             return
 
         commit_message = (
-            f'{commit.msg}'
+            f'{jira_id} : {commit.msg}'
         )
         commit_cmd: tuple[str, ...] = (
             'git', 'commit', '--quiet', '-a', '-m', commit_message,

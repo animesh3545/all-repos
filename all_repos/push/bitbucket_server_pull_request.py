@@ -142,7 +142,7 @@ def push_and_create_pr(
         branch_name: str,
         target_branch_name: str,
         default_reviewers: bool = False,
-        file_obj = None
+        file_obj=None
 ) -> None:
     resp = make_pull_request(
         base_url, auth_header, branch_name, target_branch_name,

@@ -20,6 +20,7 @@ class Config(NamedTuple):
     push_settings: Any
     all_branches: bool
     target_branches: Any
+    jira_ids: Any
 
     def _path(self, *paths: str) -> str:
         return os.path.abspath(os.path.join(self.output_dir, *paths))
@@ -60,10 +61,12 @@ def load_config(filename: str) -> Config:
     include = re.compile(contents.get('include', ''))
     exclude = re.compile(contents.get('exclude', '^$'))
     target_branches = contents.get('target_branches', {})
+    jira_ids = contents.get('jira_ids', {})
     all_branches = contents.get('all_branches', False)
     return Config(
         output_dir=output_dir, include=include, exclude=exclude,
         list_repos=source_module.list_repos, source_settings=source_settings,
         push=push_module.push, push_settings=push_settings,
-        all_branches=all_branches, target_branches=target_branches
+        all_branches=all_branches, target_branches=target_branches,
+        jira_ids=jira_ids
     )
